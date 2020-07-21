@@ -9,6 +9,7 @@ In 2007, to fulfill requirements stipulated in the Sawmill Creek Hatchery Basic 
 ## Study Area
 Salmon Lake is located 15.2 kilometers southeast of Sitka at the terminus of Silver Bay in eastern Sitka Sound. The lake lies at 17 meters above sea level and is fed primarily by two inlet streams opposite the 1.4-kilometer outlet stream.  The lake is accessible by floatplane, boat, and foot. The U.S. Forest Service maintains a recreational use cabin on the lake and a foot trail that provides access to Salmon Lake from Silver Bay. In addition to coho salmon, Salmon Lake supports populations of sockeye salmon (*O. nerka*), pink salmon (*O. gorbuscha*), chum salmon (*O. keta*), Dolly Varden (*Salvelinus malma*), cutthroat trout (*O. clarki*), steelhead (*O. mykiss*), threespine stickleback (*Gasterosteus aculeatus*), and slimy sculpin (*Cottus cognatus*). Historically (2001–2018), Salmon Lake coho salmon adult mark–recapture escapement estimates have ranged from 708 in 2012 to 3,495 in 2016 (Adams 2018).
 
+## References
 Adams, B. 2016. Fish Resources Permit Report. FRP CF-16-118. Salmon Lake Coho salmon Evaluation Project. Northern Southeast Regional Aquaculture Association, Sitka, AK.
 
 Adams, B. 2017. Fish Resources Permit Report. FRP SF2017-200. Salmon Lake Coho salmon Evaluation Project. Northern Southeast Regional Aquaculture Association, Sitka, AK.
