@@ -1,0 +1,116 @@
+---
+title: "NSRAA Salmon Lake Coho Mark-Recapture"
+author: "Sara Miller"
+date: "April 25, 2017"
+output: pdf_document
+bibliography: bibby.bib
+csl: canjfas.csl
+---
+
+# Background
+The data is organized so that each sample date is a strata. 'Total Catch' includes sampled carcasses and mortalities. This data is only from samples collected in Salmon Lake. Samples marked and recaptured in salt water were ignored for this analysis. 'New Marks' are numbers of fish given unique Floy tags.
+
+**Salmon Lake Coho Data**
+
+```{r setup, echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, error=FALSE)
+```
+
+```{r load}
+library(knitr)
+library(pander)
+library(tidyverse)
+library(lubridate)
+library(fishmethods)
+library(scales)
+library(broom)
+
+library(extrafont)
+loadfonts(device="win")
+windowsFonts(Times=windowsFont("TT Times New Roman"))
+
+theme_set(theme_bw(base_size=12,base_family='Times New Roman')+ 
+  theme(panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()))
+```
+
+Input data and create coho mark-recapture dataframe
+
+ - Total Catch (includes sampled carcasses and mortalities)
+
+```{r combine}
+coho <- data.frame(strata = 1:16, 
+		 dates = mdy(c("08/24/2016","08/31/2016","09/07/2016","09/12/2016",
+		 							"09/16/2016","09/20/2016","09/22/2016","09/27/2016",
+		 							"09/30/2016","10/04/2016","10/07/2016","10/11/2016",
+		 							"10/13/2016","10/17/2016","10/20/2016","10/27/2016")),
+		 n = c(5,3,8,6,52,8,31,9,1,65,42,28,88,58,50,49), 
+		 m = c(0,0,0,0,0,0,2,0,1,0,4,4,6,8,3,5), 
+		 r = c(5,3,8,6,52,8,29,9,0,63,38,24,82,49,46,0)) -> coho  
+
+coho %>% 
+	mutate(cm = c(0, cumsum(r)[-16]), prop = m/n) -> coho 
+
+tbl <- rbind(dplyr::select(coho, -prop),c('Total', NA, colSums(coho[,c(3:5)]), NA))
+names(tbl) <- c('Strata', 'Sample.Dates','Total.Catch', 'Recaptures', 
+					 'New.Marks', 'Cumulative.Marks')
+
+pander(tbl, missing="")
+
+```
+
+
+```{r schnabel}
+# this calculates the Schanabel and SE methods
+x = schnabel(catch = coho$n, recaps = coho$m, newmarks = coho$r, alpha=0.05)
+SE.N <- comma(round(x$N[2],0)) #abundance estimate
+invSE <- x$invSE #inverse standard errors
+SE.lci <- comma(round(x$LCI[2],0))
+SE.uci <- comma(round(x$UCI[2],0))
+```
+
+The population estimate of adult (>410mm MEF) Salmon Lake coho salmon, based on the @Schumacher1943 method, is `r SE.N` fish with lower and upper 95% confidence intervals of `r SE.lci` fish and `r SE.uci` fish, respectively, computed by a *t* distribution [@Krebs1989; @Seber2002]. The Schumacher and Eschmeyer estimation method is the most robust and useful method for multiple censuses of closed populations [@Seber2002].
+
+```{r regression}
+fit1 <- lm(prop ~ m, coho)
+adj.R2 <- sprintf("%.2f",round(summary(fit1)$adj.r.squared,2))
+p.value <- sprintf("%.3f",summary(fit1)$coefficients[2,4])
+
+coho %>% # filter out errant data
+	filter(prop<1) -> coho2
+
+fit2 <- lm(prop ~ m, coho2)
+
+adj.R22 <- sprintf("%.2f",round(summary(fit2)$adj.r.squared,2))
+p.value2 <- sprintf("%.3f", summary(fit2)$coefficients[2,4])
+
+
+
+```
+
+```{r fig_1}
+coho %>% 
+	ggplot(aes(cm, prop)) + geom_point(pch=1, cex=3.5)+
+	xlab("Number of fish previously marked (M)") + 
+	ylab("Proportion marked in catch (m/n)")+
+	geom_smooth(method = "lm", se=FALSE, color="black", lty=2)+
+	stat_smooth(color="black", method="loess")
+```
+**Figure 1**: The accumulated number of marked animals (M) against the proportion of marked animals in each sample (m/n). The plot will be linear if the assumptions underlying the method are fulfilled (dotted line). A curvilinear plot (solid line) shows that the assumptions are violated and either the population is not closed or catchability is not constant. Although this plot is curvilinear, if one removes the datapoint at y=1 (Figure 2), the data likely have a more linear relationship. 
+
+```{r fig_2}
+coho2 %>% 
+	ggplot(aes(cm, prop)) + geom_point(pch=1, cex=3.5)+
+	xlab("Number of fish previously marked (M)") + 
+	ylab("Proportion marked in catch (m/n)")+
+	geom_smooth(method = "lm", se=FALSE, color="black", lty=2)
+```
+
+**Figure 2**: The accumulated number of marked animals (M) against the proportion of marked animals in each sample (m/n). This plot does not contain data from Strata 9 (sampling date 9/30/2016). The dotted line is the linear fit. The adjusted $R^2$ from the linear regression is `r adj.R22` (p-value = `r p.value2`) a substantial increase compred to leaving the data point in `r adj.R2` (p-value = `r p.value`).
+
+If the errant datapoint is removed the abundance estimate based on the @Schumacher1943 method is valid.
+
+
+# References
+
